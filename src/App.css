@@ -1,24 +1,23 @@
 /* ===== Global Container ===== */
 .container {
-  max-width: 960px;          /* keeps the layout from getting too wide */
-  margin: 0 auto;            /* center horizontally */
+  max-width: 960px;
+  margin: 0 auto;
   background: #FFFFFF;
   border: 2px solid #294078;
   border-radius: 12px;
-  /* Slight “drop shadow” for a floating effect: */
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.08);
-  overflow: hidden;          /* clips children so header’s corners look sharp */
+  overflow: hidden;
   font-family: "Segoe UI", Arial, sans-serif;
 }
 
 /* ===== Header ===== */
 .header {
-  background-color: #294078; /* deep blue */
+  background-color: #294078;
   color: #ffffff;
   font-size: 18px;
   font-weight: bold;
   text-align: center;
-  padding: 20px 0;           /* space above & below the text */
+  padding: 20px 0;
 }
 
 /* Thin dividing line under header */
@@ -30,7 +29,7 @@
 .main-content {
   display: flex;
   flex-direction: row;
-  min-height: 640px; /* ensures that panels stay tall */
+  min-height: 640px;
 }
 
 /* ----- Left Panel ----- */
@@ -45,24 +44,40 @@
   gap: 16px;                /* vertical spacing between items */
 }
 
-/* Start Call button */
-.start-button {
-  background-color: #294078; /* deep blue */
-  color: #ffffff;
+/* Call button (Start/End) */
+.call-button {
+  width: 100%;
+  padding: 12px 0;
   font-size: 16px;
   font-weight: bold;
   border: none;
   border-radius: 8px;
-  padding: 12px 0;
   cursor: pointer;
   transition: background-color 0.2s ease;
 }
-.start-button:disabled {
-  background-color: #A0A0A0; /* gray when disabled */
-  cursor: not-allowed;
+
+/* “Start Call” style */
+.call-button.start {
+  background-color: #294078;
+  color: #ffffff;
 }
-.start-button:not(:disabled):hover {
-  background-color: #20315B; /* slightly darker on hover */
+.call-button.start:hover {
+  background-color: #20315B;
+}
+
+/* “End Call” style */
+.call-button.end {
+  background-color: #C0392B;
+  color: #ffffff;
+}
+.call-button.end:hover {
+  background-color: #922B21;
+}
+
+/* Disabled state */
+.call-button:disabled {
+  background-color: #A0A0A0;
+  cursor: not-allowed;
 }
 
 /* Status label */
@@ -74,25 +89,22 @@
 
 /* Status box */
 .status-box {
-  background-color: #EEF2F7; /* very light blue */
+  background-color: #EEF2F7;
   border: 1px solid #B0B0B0;
   border-radius: 6px;
   padding: 10px;
   font-size: 12px;
   color: #333333;
-  min-height: 48px;          /* ensures a consistent height */
+  min-height: 48px;
   display: flex;
-  align-items: center;       /* center text vertically */
+  align-items: center;
 }
-
-/* (If you have additional controls, you can add styles here) */
-/*.left-panel .some-other-control { … }*/
 
 /* ----- Right Panel ----- */
 .right-panel {
-  flex: 1;                    /* fills remaining horizontal space */
-  background-color: #F9FAFC;  /* off-white */
-  padding: 24px 20px;         /* internal padding */
+  flex: 1;
+  background-color: #F9FAFC;
+  padding: 24px 20px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -108,25 +120,15 @@
 
 /* Prompt textarea */
 .prompt-textarea {
-  flex: 1;                    /* takes up all available vertical space */
+  flex: 1;
   background-color: #ffffff;
   border: 1px solid #B0B0B0;
   border-radius: 6px;
   padding: 12px;
   font-size: 14px;
   color: #333333;
-  resize: vertical;           /* user can resize vertically, not horizontally */
-  min-height: 400px;          /* ensures it’s tall enough by default */
+  resize: vertical;
+  min-height: 400px;
   line-height: 1.4;
-  overflow-y: auto;           /* shows vertical scrollbar when content overflows */
+  overflow-y: auto;
 }
-
-/* ===== Optional Footer (if needed) ===== */
-/*.footer {
-  background-color: #294078;
-  color: #ffffff;
-  text-align: center;
-  padding: 12px 0;
-  font-size: 12px;
-}*/
-

@@ -1,37 +1,73 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { Room } from "livekit-client";    // <-- import Room instead of connect
 import "./App.css";
 
 function App() {
   const [prompt, setPrompt] = useState("");
   const [status, setStatus] = useState("");
-  const [customerNumber, setCustomerNumber] = useState("");
+  const [room, setRoom] = useState(null);
+  const [isConnected, setIsConnected] = useState(false);
 
-  // This is still a stub. You’ll hook it to your backend in Step 3.
-  const handleStartCall = async () => {
-    if (!customerNumber.trim() || !prompt.trim()) return;
-    setStatus("Calling backend to start outbound call…");
+  const handleButtonClick = async () => {
+    if (!isConnected) {
+      // ---- Start Call ----
+      if (!prompt.trim()) return;
+      setStatus("📞 Creating room and joining…");
 
-    try {
-      const response = await fetch("http://localhost:4000/start-call", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ prompt, customerNumber }),
-      });
+      try {
+        // 1) Request backend to create room & return roomName + userToken
+        const response = await fetch(
+          `${process.env.REACT_APP_API_URL}/start-call`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ prompt }),
+          }
+        );
 
-      if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.error || "Unknown error from server");
+        if (!response.ok) {
+          const errJson = await response.json();
+          throw new Error(errJson.error || "Unknown server error");
+        }
+
+        const { roomName, userToken } = await response.json();
+        setStatus(`🎉 Joining room: ${roomName}…`);
+
+        // 2) Connect to LiveKit room with the returned token
+        const lkRoom = await Room.connect(
+          process.env.REACT_APP_LIVEKIT_WS_HOST,
+          userToken,
+          { room: roomName }
+        );
+        setRoom(lkRoom);
+        setIsConnected(true);
+        setStatus(`✅ Connected to room: ${roomName}`);
+
+        // 3) Publish local microphone track
+        await lkRoom.localParticipant.setMicrophoneEnabled(true);
+      } catch (err) {
+        console.error("Error starting call:", err);
+        setStatus(`❌ Failed to join: ${err.message}`);
       }
-
-      const data = await response.json();
-      setStatus(`✅ Call initiated! Call ID: ${data.callId}`);
-    } catch (err) {
-      console.error("Error calling backend:", err);
-      setStatus(`❌ Failed to start call: ${err.message}`);
+    } else {
+      // ---- End Call ----
+      if (room) {
+        room.disconnect();
+        setRoom(null);
+      }
+      setIsConnected(false);
+      setStatus("✋ You have left the room.");
     }
   };
+
+  // Clean up if component unmounts
+  useEffect(() => {
+    return () => {
+      if (room) {
+        room.disconnect();
+      }
+    };
+  }, [room]);
 
   return (
     <div className="container">
@@ -40,16 +76,16 @@ function App() {
         Real Estate Voice Agent Dashboard
       </header>
 
-      {/* Main content area: two columns */}
+      {/* Main content */}
       <div className="main-content">
-        {/* Left Panel: Actions + Status */}
+        {/* Left Panel */}
         <div className="left-panel">
           <button
-            className="start-button"
-            onClick={handleStartCall}
-            disabled={!customerNumber.trim() || !prompt.trim()}
+            className={`call-button ${isConnected ? "end" : "start"}`}
+            onClick={handleButtonClick}
+            disabled={!prompt.trim()}
           >
-            Start Call
+            {isConnected ? "End Call" : "Start Call"}
           </button>
 
           <div className="status-label">Status:</div>
@@ -58,7 +94,7 @@ function App() {
           </div>
         </div>
 
-        {/* Right Panel: Prompt Input */}
+        {/* Right Panel */}
         <div className="right-panel">
           <label htmlFor="promptArea" className="prompt-label">
             Enter custom prompt for the agent:
@@ -69,12 +105,10 @@ function App() {
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             placeholder="Type your detailed prompt here…"
+            disabled={isConnected}
           />
         </div>
       </div>
-
-      {/* Optional: a footer or extra information if you need it */}
-      {/* <footer className="footer">© 2025 Real Estate Co.</footer> */}
     </div>
   );
 }
